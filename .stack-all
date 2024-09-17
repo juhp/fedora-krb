@@ -1,0 +1,3 @@
+[versions]
+# lts-12 simple-cmd too old (error')
+oldest = lts-13
