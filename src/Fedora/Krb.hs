@@ -12,31 +12,33 @@ import SimpleCmd
 
 krbTicket :: IO ()
 krbTicket = do
-  krb <- klistEntryFedora
-  if null krb
+  entry <- klistEntryFedora
+  if null entry
     then error' "No krb5 ticket found for FEDORAPROJECT.ORG"
     else
-    when (last krb == "(Expired)") $ do
-      putStrLn $ unwords krb
-      fkinit
-      putStrLn ""
+    when (last entry == "(Expired)") $ do
+    putStrLn $ unwords entry
+    fkinit $ maybeFasIdFromKrb entry
+    putStrLn ""
   where
-    fkinit = do
+    fkinit muser = do
+      let opts = maybe [] (\user -> ["-u", user]) muser
       -- FIXME test for fkinit
-      ok <- cmdBool "fkinit" []
-      unless ok fkinit
+      ok <- cmdBool "fkinit" opts
+      unless ok $ fkinit muser
 
-maybeFasIdFromKrb :: IO (Maybe String)
+maybeFasIdFromKrb :: [String] -> Maybe String
 maybeFasIdFromKrb =
-  fmap (removeSuffix "@FEDORAPROJECT.ORG") . L.find ("@FEDORAPROJECT.ORG" `L.isSuffixOf`) <$> klistEntryFedora
+  fmap (removeSuffix "@FEDORAPROJECT.ORG") . L.find ("@FEDORAPROJECT.ORG" `L.isSuffixOf`)
 
 fasIdFromKrb :: IO String
 fasIdFromKrb = do
-  mfasid <- maybeFasIdFromKrb
+  mfasid <- maybeFasIdFromKrb <$> klistEntryFedora
   case mfasid of
-    Nothing -> error' "Could not determine fasid from klist"
+    Nothing -> error' "Could not determine FAS id from klist"
     Just fasid -> return fasid
 
+-- gets first FEDORAPROJECT.ORG entry
 klistEntryFedora :: IO [String]
 klistEntryFedora = do
   -- FIXME test for klist
