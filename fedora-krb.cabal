@@ -3,7 +3,7 @@ version:             0.1.0
 synopsis:            Kerberos for Fedora packagers
 description:
         A small library wrapping fkinit for Fedora developers.
-license:             BSD3
+license:             GPL-2
 license-file:        LICENSE
 author:              Jens Petersen <petersen@redhat.com>
 maintainer:          Jens Petersen <petersen@redhat.com>
