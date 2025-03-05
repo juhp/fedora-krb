@@ -1,7 +1,7 @@
 module Fedora.Krb (
-  fasIdFromKrb,
+  krbTicket,
   maybeFasIdFromKrb,
-  krbTicket
+  fasIdFromKrb
   )
 where
 
@@ -18,7 +18,7 @@ krbTicket = do
     else
     when (last entry == "(Expired)") $ do
     putStrLn $ unwords entry
-    fkinit $ maybeFasIdFromKrb entry
+    fkinit $ extractFasId entry
     putStrLn ""
   where
     fkinit muser = do
@@ -27,13 +27,16 @@ krbTicket = do
       ok <- cmdBool "fkinit" opts
       unless ok $ fkinit muser
 
-maybeFasIdFromKrb :: [String] -> Maybe String
-maybeFasIdFromKrb =
+extractFasId :: [String] -> Maybe String
+extractFasId =
   fmap (removeSuffix "@FEDORAPROJECT.ORG") . L.find ("@FEDORAPROJECT.ORG" `L.isSuffixOf`)
+
+maybeFasIdFromKrb :: IO (Maybe String)
+maybeFasIdFromKrb = extractFasId <$> klistEntryFedora
 
 fasIdFromKrb :: IO String
 fasIdFromKrb = do
-  mfasid <- maybeFasIdFromKrb <$> klistEntryFedora
+  mfasid <- maybeFasIdFromKrb
   case mfasid of
     Nothing -> error' "Could not determine FAS id from klist"
     Just fasid -> return fasid
