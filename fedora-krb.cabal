@@ -13,7 +13,7 @@ homepage:            https://github.com/juhp/fedora-krb
 bug-reports:         https://github.com/juhp/fedora-krb/issues
 build-type:          Simple
 extra-doc-files:     README.md
---                       ChangeLog.md
+                     ChangeLog.md
 cabal-version:       2.0
 tested-with:         GHC == 8.4.4, GHC == 8.6.5, GHC == 8.8.4, GHC == 8.10.7
                      GHC == 9.0.2, GHC == 9.2.8, GHC == 9.4.8, GHC == 9.6.6,
