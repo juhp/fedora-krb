@@ -12,6 +12,7 @@ import SimpleCmd (cmdBool, cmdMaybe, error', (+-+))
 import SimplePrompt (prompt)
 import System.Posix.User (getLoginName)
 
+-- | ensure there is a valid Fedora developer Kerberos ticket
 krbTicket :: IO ()
 krbTicket = do
   entry <- klistEntryFedora
@@ -41,9 +42,11 @@ extractFasId :: [String] -> Maybe String
 extractFasId =
   fmap (dropSuffix "@FEDORAPROJECT.ORG") . find ("@FEDORAPROJECT.ORG" `isSuffixOf`)
 
+-- | get FAS id from Krb ticket principal
 maybeFasIdFromKrb :: IO (Maybe String)
 maybeFasIdFromKrb = extractFasId <$> klistEntryFedora
 
+-- | get FAS id from krb: error if no fedora ticket found
 fasIdFromKrb :: IO String
 fasIdFromKrb = do
   mfasid <- maybeFasIdFromKrb
