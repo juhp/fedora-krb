@@ -9,12 +9,16 @@ import Control.Monad
 import qualified Data.List as L
 import Data.Maybe
 import SimpleCmd
+import SimplePrompt
+import System.Posix.User (getLoginName)
 
 krbTicket :: IO ()
 krbTicket = do
   entry <- klistEntryFedora
   if null entry
-    then error' "No krb5 ticket found for FEDORAPROJECT.ORG"
+    then do
+      warning "No krb5 ticket found for FEDORAPROJECT.ORG"
+      fkinit Nothing
     else
     when (last entry == "(Expired)") $ do
     putStrLn $ unwords entry
@@ -22,9 +26,15 @@ krbTicket = do
     putStrLn ""
   where
     fkinit muser = do
-      let opts = maybe [] (\user -> ["-u", user]) muser
+      user <-
+        case muser of
+          Just u -> return u
+          Nothing -> do
+            username <- getLoginName
+            inp <- prompt $ "Enter FAS username [default" +-+ username ++ "]"
+            return $ if null inp then username else inp
       -- FIXME test for fkinit
-      ok <- cmdBool "fkinit" opts
+      ok <- cmdBool "fkinit" ["-u", user]
       unless ok $ fkinit muser
 
 extractFasId :: [String] -> Maybe String
