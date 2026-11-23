@@ -5,11 +5,11 @@ module Fedora.Krb (
   )
 where
 
-import Control.Monad
-import qualified Data.List as L
-import Data.Maybe
-import SimpleCmd
-import SimplePrompt
+import Control.Monad (unless, when)
+import Data.List.Extra (dropSuffix, find, isInfixOf, isSuffixOf)
+import Data.Maybe (fromMaybe)
+import SimpleCmd (cmdBool, cmdMaybe, error', (+-+))
+import SimplePrompt (prompt)
 import System.Posix.User (getLoginName)
 
 krbTicket :: IO ()
@@ -17,7 +17,7 @@ krbTicket = do
   entry <- klistEntryFedora
   if null entry
     then do
-      warning "No krb5 ticket found for FEDORAPROJECT.ORG"
+      putStrLn "No krb5 ticket found for FEDORAPROJECT.ORG"
       fkinit Nothing
     else
     when (last entry == "(Expired)") $ do
@@ -39,7 +39,7 @@ krbTicket = do
 
 extractFasId :: [String] -> Maybe String
 extractFasId =
-  fmap (removeSuffix "@FEDORAPROJECT.ORG") . L.find ("@FEDORAPROJECT.ORG" `L.isSuffixOf`)
+  fmap (dropSuffix "@FEDORAPROJECT.ORG") . find ("@FEDORAPROJECT.ORG" `isSuffixOf`)
 
 maybeFasIdFromKrb :: IO (Maybe String)
 maybeFasIdFromKrb = extractFasId <$> klistEntryFedora
@@ -58,5 +58,5 @@ klistEntryFedora = do
   mres <- cmdMaybe "klist" ["-l"]
   return $
     maybe []
-    (words . fromMaybe "" . L.find ("@FEDORAPROJECT.ORG" `L.isInfixOf`) . lines)
+    (words . fromMaybe "" . find ("@FEDORAPROJECT.ORG" `isInfixOf`) . lines)
     mres

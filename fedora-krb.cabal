@@ -25,6 +25,7 @@ source-repository head
 
 library
   build-depends:       base < 5,
+                       extra,
                        simple-cmd,
                        simple-prompt,
                        unix
